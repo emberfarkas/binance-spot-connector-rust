@@ -65,13 +65,22 @@ where
         } = request.into();
         let mut url_parts = vec![self.base_url.to_owned(), path];
         let has_params = !params.is_empty();
-        let mut serializer = url::form_urlencoded::Serializer::new(String::new());
-        if has_params {
-            for (k, v) in params.iter() {
-                serializer.append_pair(k, v);
-            }
-        }
-        let mut query_string = serializer.finish();
+        let mut query_string = url::Url::parse_with_params(
+                "http://example.com", 
+                &params
+            )
+            .unwrap()
+            .query()
+            .map(|s| s.to_owned())
+            .unwrap();
+        // let mut serializer = url::form_urlencoded::Serializer::new(String::new());
+        // if has_params {
+        //     for (k, v) in params.iter() {
+        //         serializer.append_pair(k, v);
+        //     }
+        // }
+        // let mut query_string = serializer.finish();
+        // let mut query_string = "".to_owned();
         let mut hyper_request = hyper::Request::builder().method(method);
         let user_agent = &format!("binance-spot-connector-rust/{}", VERSION);
         hyper_request = hyper_request.header("User-Agent", user_agent);
